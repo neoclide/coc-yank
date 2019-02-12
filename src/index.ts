@@ -3,6 +3,8 @@ import { group, statAsync, mkdirAsync } from './util'
 import YankList from './list/yank'
 import DB from './db'
 
+const START_ID = 2080
+
 export async function activate(context: ExtensionContext): Promise<void> {
   let { subscriptions, storagePath } = context
   let stat = await statAsync(storagePath)
@@ -14,6 +16,21 @@ export async function activate(context: ExtensionContext): Promise<void> {
   if (config.get<boolean>('highlight.enable', true)) {
     workspace.nvim.command('highlight default link HighlightedyankRegion IncSearch', true)
   }
+  let srcId = START_ID
+  let winid: number
+  let curr_ids: number[] = []
+  workspace.registerAutocmd({
+    event: 'WinLeave',
+    arglist: ['win_getid()'],
+    request: true,
+    callback: async (wid) => {
+      if (wid != winid) return
+      if (curr_ids.length) {
+        await workspace.nvim.call('coc#util#clearmatches', [curr_ids])
+        curr_ids = []
+      }
+    }
+  })
   subscriptions.push(listManager.registerList(new YankList(workspace.nvim, db)))
   subscriptions.push(workspace.registerAutocmd({
     event: 'TextYankPost',
@@ -22,6 +39,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       let { nvim } = workspace
       let { regtype, operator, regcontents } = event
       if (operator != 'y') return
+      winid = await nvim.call('win_getid')
       let enable = config.get<boolean>('highlight.enable', true)
       let doc = workspace.getDocument(bufnr)
       if (!doc) return
@@ -55,13 +73,18 @@ export async function activate(context: ExtensionContext): Promise<void> {
         } else {
           return
         }
+        nvim.pauseNotification()
         for (let list of group(ranges, 8)) {
-          let id = await nvim.call('matchaddpos', ['HighlightedyankRegion', list, 99]) as number
-          ids.push(id)
+          nvim.call('matchaddpos', ['HighlightedyankRegion', list, 99, srcId], true)
+          ids.push(srcId)
+          srcId = srcId + 1
         }
+        await nvim.resumeNotification()
         if (ids.length) {
+          curr_ids.push(...ids)
           setTimeout(async () => {
-            await nvim.call('coc#util#clearmatches', [bufnr, ids])
+            await nvim.call('coc#util#clearmatches', [ids])
+            srcId = START_ID
           }, duration)
         }
       }

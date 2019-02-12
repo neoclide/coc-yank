@@ -21,6 +21,13 @@ In your vim/neovim, run command:
 - `yank.highlight.duration` duration of highlight in miliseconds, default: 500.
 - `yank.highlight.maxsize` maxsize of yank list, default: 200
 
+## F.A.Q
+
+Q: How to change highlight color?
+
+A: Add `hi HighlightedyankRegion term=bold ctermbg=0 guibg=#13354A` to your
+`.vimrc` after `:colorscheme` command.
+
 ## License
 
 MIT
