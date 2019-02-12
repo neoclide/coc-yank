@@ -42,7 +42,6 @@ export default class YankList extends BasicList {
           })
         }
       }
-      console.log(JSON.stringify(edits, null, 2))
       await doc.applyEdits(nvim, edits)
     })
 
