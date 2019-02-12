@@ -90,7 +90,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       }
       let path = `${doc.uri}\t${lnum}\t${col}`
       regtype = regtype.startsWith('\x16') ? '^v' : regtype
-      await db.add(regcontents, regtype, path)
+      await db.add(regcontents, regtype, path, doc.filetype)
     }
   }))
 }

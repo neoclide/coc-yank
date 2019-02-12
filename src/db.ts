@@ -2,12 +2,12 @@ import path from 'path'
 import { statAsync, writeFile, readFile } from './util'
 import uuid = require('uuid/v1')
 
-
 export interface HistoryItem {
   id: string
   content: string[]
   regtype: string
   path: string
+  filetype: string
 }
 
 export default class DB {
@@ -24,12 +24,12 @@ export default class DB {
     return JSON.parse(content) as HistoryItem[]
   }
 
-  public async add(content: string[], regtype: string, path: string): Promise<void> {
+  public async add(content: string[], regtype: string, path: string, filetype: string): Promise<void> {
     let items = await this.load()
     if (items.length == this.maxsize) {
       items.pop()
     }
-    items.unshift({ id: uuid(), content, regtype, path })
+    items.unshift({ id: uuid(), content, regtype, path, filetype })
     await writeFile(this.file, JSON.stringify(items, null, 2))
   }
 
