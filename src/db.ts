@@ -13,7 +13,7 @@ export interface HistoryItem {
 export default class DB {
   private file: string
 
-  constructor(directory: string) {
+  constructor(directory: string, private maxsize: number) {
     this.file = path.join(directory, 'yank.json')
   }
 
@@ -26,6 +26,9 @@ export default class DB {
 
   public async add(content: string[], regtype: string, path: string): Promise<void> {
     let items = await this.load()
+    if (items.length == this.maxsize) {
+      items.pop()
+    }
     items.unshift({ id: uuid(), content, regtype, path })
     await writeFile(this.file, JSON.stringify(items, null, 2))
   }

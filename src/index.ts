@@ -11,8 +11,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
   if (!stat || !stat.isDirectory()) {
     await mkdirAsync(storagePath)
   }
-  let db = new DB(storagePath)
   const config = workspace.getConfiguration('yank')
+  let db = new DB(storagePath, config.get<number>('list.maxsize', 200))
   if (config.get<boolean>('highlight.enable', true)) {
     workspace.nvim.command('highlight default link HighlightedyankRegion IncSearch', true)
   }
