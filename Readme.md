@@ -10,6 +10,14 @@ In your vim/neovim, run command:
 :CocInstall coc-yank
 ```
 
+Setup keymap to open yank list like:
+
+```
+nnoremap <silent> <space>y  :<C-u>CocList -A --normal yank<cr>
+```
+
+`-A` means auto preview, and `--normal` means open list on normal mode.
+
 ## Features
 
 - Highlight yanked text.
