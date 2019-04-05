@@ -1,6 +1,5 @@
-import { BasicList, ListContext, workspace, ListItem } from 'coc.nvim'
+import { Neovim, BasicList, ListContext, workspace, ListItem } from 'coc.nvim'
 import { Position, Range, TextEdit } from 'vscode-languageserver-protocol'
-import { Neovim } from '@chemzqm/neovim'
 import DB, { HistoryItem } from '../db'
 import colors from 'colors/safe'
 
@@ -77,11 +76,11 @@ export default class YankList extends BasicList {
       await doc.applyEdits(nvim, edits)
     })
 
-    this.addAction('open', (item: ListItem) => {
+    this.addAction('open', async (item: ListItem) => {
       let content = item.data.path as string
       let parts = content.split('\t')
       let position = Position.create(Number(parts[1]) - 1, Number(parts[2]) - 1)
-      workspace.jumpTo(parts[0], position)
+      await workspace.jumpTo(parts[0], position)
     })
 
     this.addAction('yank', (item: ListItem) => {
