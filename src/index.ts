@@ -18,19 +18,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
   let srcId = START_ID
   let winid: number
-  let curr_ids: number[] = []
-  workspace.registerAutocmd({
-    event: 'WinLeave',
-    arglist: ['win_getid()'],
-    request: true,
-    callback: async (wid) => {
-      if (wid != winid) return
-      if (curr_ids.length) {
-        await workspace.nvim.call('coc#util#clearmatches', [curr_ids])
-        curr_ids = []
-      }
-    }
-  })
   subscriptions.push(listManager.registerList(new YankList(workspace.nvim, db)))
   subscriptions.push(workspace.registerAutocmd({
     event: 'TextYankPost',
@@ -80,8 +67,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
           srcId = srcId + 1
         }
         await nvim.resumeNotification()
+        nvim.call('coc#util#add_matchids', [ids], true)
         if (ids.length) {
-          curr_ids.push(...ids)
           setTimeout(async () => {
             await nvim.call('coc#util#clearmatches', [ids])
             srcId = START_ID
