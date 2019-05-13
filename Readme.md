@@ -27,7 +27,7 @@ nnoremap <silent> <space>y  :<C-u>CocList -A --normal yank<cr>
 
 - `yank.highlight.enable` enable highlight feature, default: `true`.
 - `yank.highlight.duration` duration of highlight in miliseconds, default: 500.
-- `yank.highlight.maxsize` maxsize of yank list, default: 200
+- `yank.list.maxsize` maxsize of yank list, default: 200
 
 ## F.A.Q
 
