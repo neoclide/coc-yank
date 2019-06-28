@@ -1,5 +1,6 @@
 import path from 'path'
 import { statAsync, writeFile, readFile } from './util'
+import fs from 'fs'
 import uuid = require('uuid/v1')
 
 export interface HistoryItem {
@@ -30,7 +31,7 @@ export default class DB {
       items.pop()
     }
     items.unshift({ id: uuid(), content, regtype, path, filetype })
-    await writeFile(this.file, JSON.stringify(items, null, 2))
+    fs.writeFileSync(this.file, JSON.stringify(items, null, 2), 'utf8')
   }
 
   public async delete(uid: string): Promise<void> {
@@ -38,7 +39,7 @@ export default class DB {
     let idx = items.findIndex(o => o.id == uid)
     if (idx !== -1) {
       items.splice(idx, 1)
-      await writeFile(this.file, JSON.stringify(items, null, 2))
+      fs.writeFileSync(this.file, JSON.stringify(items, null, 2), 'utf8')
     }
   }
 }

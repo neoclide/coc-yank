@@ -66,11 +66,11 @@ export async function activate(context: ExtensionContext): Promise<void> {
           ids.push(srcId)
           srcId = srcId + 1
         }
-        await nvim.resumeNotification()
         nvim.call('coc#util#add_matchids', [ids], true)
+        await nvim.resumeNotification()
         if (ids.length) {
-          setTimeout(async () => {
-            await nvim.call('coc#util#clearmatches', [ids])
+          setTimeout(() => {
+            nvim.call('coc#util#clearmatches', [ids], true)
             srcId = START_ID
           }, duration)
         }
