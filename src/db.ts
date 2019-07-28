@@ -1,6 +1,6 @@
-import path from 'path'
-import { statAsync, writeFile, readFile } from './util'
 import fs from 'fs'
+import path from 'path'
+import { readFile } from './util'
 import uuid = require('uuid/v1')
 
 export interface HistoryItem {
@@ -19,10 +19,13 @@ export default class DB {
   }
 
   public async load(): Promise<HistoryItem[]> {
-    let stat = await statAsync(this.file)
-    if (!stat || !stat.isFile()) return []
-    let content = await readFile(this.file)
-    return JSON.parse(content) as HistoryItem[]
+    if (!fs.existsSync(this.file)) return []
+    try {
+      let content = await readFile(this.file)
+      return JSON.parse(content) as HistoryItem[]
+    } catch (e) {
+      return []
+    }
   }
 
   public async add(content: string[], regtype: string, path: string, filetype: string): Promise<void> {
