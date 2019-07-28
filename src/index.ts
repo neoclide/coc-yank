@@ -1,7 +1,7 @@
 import { ExtensionContext, listManager, workspace } from 'coc.nvim'
-import { group, statAsync, mkdirAsync } from './util'
-import YankList from './list/yank'
 import DB from './db'
+import YankList from './list/yank'
+import { group, mkdirAsync, statAsync } from './util'
 
 const START_ID = 2080
 
@@ -80,4 +80,17 @@ export async function activate(context: ExtensionContext): Promise<void> {
       await db.add(regcontents, regtype, path, doc.filetype)
     }
   }))
+
+  // let sourceConfig = workspace.getConfiguration('coc.source.yank')
+  // // create yank source
+  // sources.createSource({
+  //   name: 'yank',
+  //   duplicate: false,
+  //   doComplete: (opt, token) => {
+  //     // load by filetype, add @", check if lines accepted.
+  //     return Promise.resolve({
+  //       items: [{ word: 'a', }, { word: 'b' }]
+  //     })
+  //   }
+  // })
 }
