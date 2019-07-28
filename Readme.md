@@ -28,6 +28,8 @@ nnoremap <silent> <space>y  :<C-u>CocList -A --normal yank<cr>
 - `yank.highlight.enable` enable highlight feature, default: `true`.
 - `yank.highlight.duration` duration of highlight in miliseconds, default: 500.
 - `yank.list.maxsize` maxsize of yank list, default: 200
+- `yank.enableCompletion`: Enable completion support for yanked text, default: `true`
+- `yank.priority`: Priority of yank completion source, default: 90.
 
 ## F.A.Q
 

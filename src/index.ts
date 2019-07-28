@@ -1,7 +1,8 @@
-import { ExtensionContext, listManager, workspace } from 'coc.nvim'
+import { ExtensionContext, languages, listManager, workspace } from 'coc.nvim'
 import DB from './db'
 import YankList from './list/yank'
 import { group, mkdirAsync, statAsync } from './util'
+import { CompletionItem, CompletionItemKind } from 'vscode-languageserver-types'
 
 const START_ID = 2080
 
@@ -81,16 +82,22 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }
   }))
 
-  // let sourceConfig = workspace.getConfiguration('coc.source.yank')
-  // // create yank source
-  // sources.createSource({
-  //   name: 'yank',
-  //   duplicate: false,
-  //   doComplete: (opt, token) => {
-  //     // load by filetype, add @", check if lines accepted.
-  //     return Promise.resolve({
-  //       items: [{ word: 'a', }, { word: 'b' }]
-  //     })
-  //   }
-  // })
+  languages.registerCompletionItemProvider('yank', 'YANK', null, {
+    provideCompletionItems: async (document, _position, _token, context): Promise<CompletionItem[]> => {
+      const config = workspace.getConfiguration('yank')
+      let enabled = config.get<boolean>('enableCompletion', true)
+      if (!enabled) return []
+      let { option } = context as any
+      if (!option || !option.input) return
+      let items = await db.load()
+      items = items.filter(o => o.filetype == document.languageId && o.content[0].startsWith(option.input))
+      return items.map(item => {
+        return {
+          label: item.content[0],
+          insertText: item.content.join('\n'),
+          kind: CompletionItemKind.Text,
+        } as CompletionItem
+      })
+    }
+  }, [], config.get('priority', 9))
 }

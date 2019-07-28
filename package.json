@@ -51,7 +51,7 @@
         "yank.priority": {
           "type": "integer",
           "description": "Priority of yank completion source.",
-          "default": 3
+          "default": 90
         }
       }
     }
