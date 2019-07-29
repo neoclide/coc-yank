@@ -1,10 +1,8 @@
-import { ExtensionContext, languages, listManager, workspace } from 'coc.nvim'
+import { ExtensionContext, languages, listManager, workspace, Document } from 'coc.nvim'
 import DB from './db'
 import YankList from './list/yank'
-import { group, mkdirAsync, statAsync } from './util'
-import { CompletionItem, CompletionItemKind } from 'vscode-languageserver-types'
-
-const START_ID = 2080
+import { mkdirAsync, statAsync } from './util'
+import { CompletionItem, CompletionItemKind, Range, Position } from 'vscode-languageserver-types'
 
 export async function activate(context: ExtensionContext): Promise<void> {
   let { subscriptions, storagePath } = context
@@ -17,7 +15,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
   if (config.get<boolean>('highlight.enable', true)) {
     workspace.nvim.command('highlight default link HighlightedyankRegion IncSearch', true)
   }
-  let srcId = START_ID
   let winid: number
   subscriptions.push(listManager.registerList(new YankList(workspace.nvim, db)))
   subscriptions.push(workspace.registerAutocmd({
@@ -26,15 +23,17 @@ export async function activate(context: ExtensionContext): Promise<void> {
     callback: async (event, bufnr) => {
       let { nvim } = workspace
       let { regtype, operator, regcontents } = event
-      if (operator != 'y') return
-      winid = await nvim.call('win_getid')
-      let enable = config.get<boolean>('highlight.enable', true)
       let doc = workspace.getDocument(bufnr)
       if (!doc) return
+      doc.forceSync()
       let [, lnum, col] = await nvim.call('getpos', ["'["])
-      if (enable) {
-        let ids: number[] = []
-        let ranges: number[][] = []
+      let character = byteSlice(doc.getline(lnum - 1), 0, col).length
+      if (operator == 'y') {
+        // highlight
+        let enable = config.get<boolean>('highlight.enable', true)
+        if (!enable) return
+        winid = await nvim.call('win_getid')
+        let ranges: Range[] = []
         let duration = config.get<number>('highlight.duration', 500)
         // block selection
         if (regtype.startsWith('\x16')) {
@@ -42,37 +41,33 @@ export async function activate(context: ExtensionContext): Promise<void> {
           await nvim.call('setpos', ['.', [0, lnum, col, 0]])
           for (let i = lnum; i < lnum + regcontents.length; i++) {
             let col = await nvim.call('col', ['.'])
-            ranges.push([i, col, Number(regtype[1])])
+            let line = doc.getline(i - 1)
+            let startCharacter = byteSlice(line, 0, col - 1).length
+            let start = Position.create(i - 1, startCharacter)
+            let end = Position.create(i - 1, startCharacter + regcontents[i - lnum].length)
+            ranges.push(Range.create(start, end))
             await nvim.command('normal! j')
           }
           await nvim.call('winrestview', [view])
         } else if (regtype == 'v') {
-          for (let i = lnum; i < lnum + regcontents.length; i++) {
-            if (i == lnum) {
-              ranges.push([i, col, Buffer.byteLength(regcontents[0])])
-            } else {
-              ranges.push([i, 1, Buffer.byteLength(regcontents[i - lnum])])
-            }
-          }
+          let start = Position.create(lnum - 1, character)
+          let endCharacter = regcontents.length == 1 ? character + regcontents[0].length - 1 : regcontents[regcontents.length - 1].length
+          let end = Position.create(lnum + regcontents.length - 2, endCharacter)
+          ranges.push(Range.create(start, end))
         } else if (regtype == 'V') {
           for (let i = lnum; i < lnum + regcontents.length; i++) {
-            ranges.push([i])
+            let line = doc.getline(i - 1)
+            ranges.push(Range.create(i - 1, 0, i - 1, line.length))
           }
         } else {
           return
         }
         nvim.pauseNotification()
-        for (let list of group(ranges, 8)) {
-          nvim.call('matchaddpos', ['HighlightedyankRegion', list, 99, srcId], true)
-          ids.push(srcId)
-          srcId = srcId + 1
-        }
-        nvim.call('coc#util#add_matchids', [ids], true)
+        let ids = doc.matchAddRanges(ranges, 'HighlightedyankRegion', 99)
         await nvim.resumeNotification()
         if (ids.length) {
           setTimeout(() => {
             nvim.call('coc#util#clearmatches', [ids], true)
-            srcId = START_ID
           }, duration)
         }
       }
@@ -100,4 +95,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
       })
     }
   }, [], config.get('priority', 9))
+}
+
+function byteSlice(content: string, start: number, end?: number): string {
+  let buf = Buffer.from(content, 'utf8')
+  return buf.slice(start, end).toString('utf8')
 }

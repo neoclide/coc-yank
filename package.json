@@ -14,7 +14,7 @@
     "url": "git+https://github.com/neoclide/coc-yank.git"
   },
   "engines": {
-    "coc": "^0.0.54"
+    "coc": "^0.0.73"
   },
   "scripts": {
     "clean": "rimraf lib",

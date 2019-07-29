@@ -118,7 +118,7 @@ export default class YankList extends BasicList {
     let arr = await this.db.load()
     let columns = await this.nvim.getOption('columns') as number
     let res: ListItem[] = []
-    for (let item of arr) {
+    for (let item of arr.reverse()) {
       let regtype: string
       if (item.regtype == 'v') {
         regtype = 'char '
