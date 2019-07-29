@@ -89,9 +89,9 @@ export default class YankList extends BasicList {
       nvim.command(`let @" = "${content.join('\\n')}"`, true)
     })
 
-    this.addAction('delete', async (item: ListItem) => {
-      let { id } = item.data
-      await this.db.delete(id)
+    this.addMultipleAction('delete', async (items: ListItem[]) => {
+      let ids = items.map(o => o.data.id)
+      await this.db.delete(ids)
     }, { persist: true, reload: true })
 
     this.addAction('preview', async (item: ListItem, context) => {

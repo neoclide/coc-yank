@@ -71,6 +71,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
           }, duration)
         }
       }
+      let content = regcontents.join('\n')
+      if (content.length < 4) return
       let path = `${doc.uri}\t${lnum}\t${col}`
       regtype = regtype.startsWith('\x16') ? '^v' : regtype
       await db.add(regcontents, regtype, path, doc.filetype)
@@ -92,16 +94,27 @@ export async function activate(context: ExtensionContext): Promise<void> {
         return o.filetype == document.languageId && o.content[0].trim().startsWith(option.input)
       })
       let before_content = option.line.slice(0, option.col)
-      if (!/^\s$/.test(before_content)) {
-        items = items.filter(o => o.regtype == 'V')
+      if (!/^\s*$/.test(before_content)) {
+        items = items.filter(o => o.regtype != 'V')
       }
       items = items.slice(0, limit)
       return items.map(item => {
+        let ind = item.content.reduce((p, s) => {
+          let ms = s.match(/^\s*/)[0]
+          return Math.min(ms.length, p)
+        }, Infinity)
+        let lines = item.content.map((s, i) => {
+          if (i == 0) return s.replace(/^\s*/, '')
+          return s.slice(ind)
+        })
         return {
-          label: item.content[0],
-          insertText: item.content.join('\n'),
-          kind: CompletionItemKind.Text,
-          documentation: item.content.join('\n')
+          label: item.content[0].trim(),
+          insertText: lines.join('\n'),
+          kind: CompletionItemKind.Snippet,
+          documentation: {
+            kind: 'markdown',
+            value: markdownBlock(lines.join('\n'), item.filetype)
+          }
         } as CompletionItem
       })
     }
@@ -111,4 +124,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
 function byteSlice(content: string, start: number, end?: number): string {
   let buf = Buffer.from(content, 'utf8')
   return buf.slice(start, end).toString('utf8')
+}
+
+function markdownBlock(code: string, filetype: string): string {
+  filetype = filetype == 'javascriptreact' ? 'javascript' : filetype
+  filetype = filetype == 'typescriptreact' ? 'typescript' : filetype
+  return '``` ' + filetype + '\n' + code + '\n```'
 }

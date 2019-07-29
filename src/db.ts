@@ -85,19 +85,19 @@ export default class DB {
     fs.appendFileSync(this.file, lines.join('\n') + '\n', 'utf8')
   }
 
-  public async delete(id: string): Promise<void> {
+  public async delete(id: string | string[]): Promise<void> {
     let items = await this.load()
-    let idx = items.findIndex(o => o.id == id)
-    if (idx !== -1) {
-      items.splice(idx, 1)
-      let lines: string[] = []
-      for (let item of items) {
-        let [path, lnum, col] = item.path.split('\t')
-        let line = `${item.id}|${path}|${lnum}|${col}|${item.regtype}|${item.filetype}`
-        lines.push(line)
-        lines.push(...item.content.map(s => `\t${s}`))
-      }
-      fs.writeFileSync(this.file, lines.join('\n') + '\n', 'utf8')
+    items = items.filter(o => {
+      if (typeof id == 'string') return o.id != id
+      return id.indexOf(o.id) == -1
+    })
+    let lines: string[] = []
+    for (let item of items) {
+      let [path, lnum, col] = item.path.split('\t')
+      let line = `${item.id}|${path}|${lnum}|${col}|${item.regtype}|${item.filetype}`
+      lines.push(line)
+      lines.push(...item.content.map(s => `\t${s}`))
     }
+    fs.writeFileSync(this.file, lines.join('\n') + '\n', 'utf8')
   }
 }
