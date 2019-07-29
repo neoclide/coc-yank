@@ -1,8 +1,8 @@
-import { ExtensionContext, languages, listManager, workspace, Document } from 'coc.nvim'
+import { ExtensionContext, languages, listManager, workspace } from 'coc.nvim'
+import { CompletionItem, CompletionItemKind, Position, Range } from 'vscode-languageserver-types'
 import DB from './db'
 import YankList from './list/yank'
 import { mkdirAsync, statAsync } from './util'
-import { CompletionItem, CompletionItemKind, Range, Position } from 'vscode-languageserver-types'
 
 export async function activate(context: ExtensionContext): Promise<void> {
   let { subscriptions, storagePath } = context
@@ -82,15 +82,26 @@ export async function activate(context: ExtensionContext): Promise<void> {
       const config = workspace.getConfiguration('yank')
       let enabled = config.get<boolean>('enableCompletion', true)
       if (!enabled) return []
+      let limit = config.get<number>('limit', 3)
       let { option } = context as any
       if (!option || !option.input) return
       let items = await db.load()
-      items = items.filter(o => o.filetype == document.languageId && o.content[0].startsWith(option.input))
+      items.reverse()
+      items = items.filter(o => {
+        if (o.regtype == '^v') return false
+        return o.filetype == document.languageId && o.content[0].trim().startsWith(option.input)
+      })
+      let before_content = option.line.slice(0, option.col)
+      if (!/^\s$/.test(before_content)) {
+        items = items.filter(o => o.regtype == 'V')
+      }
+      items = items.slice(0, limit)
       return items.map(item => {
         return {
           label: item.content[0],
           insertText: item.content.join('\n'),
           kind: CompletionItemKind.Text,
+          documentation: item.content.join('\n')
         } as CompletionItem
       })
     }

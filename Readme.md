@@ -30,6 +30,7 @@ nnoremap <silent> <space>y  :<C-u>CocList -A --normal yank<cr>
 - `yank.list.maxsize` maxsize of yank list, default: 200
 - `yank.enableCompletion`: Enable completion support for yanked text, default: `true`
 - `yank.priority`: Priority of yank completion source, default: 90.
+- `yank.limit`: Max completion item count from yank history.
 
 ## F.A.Q
 

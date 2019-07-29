@@ -52,6 +52,11 @@
           "type": "integer",
           "description": "Priority of yank completion source.",
           "default": 90
+        },
+        "yank.limit": {
+          "type": "integer",
+          "description": "Max completion item count from yank history.",
+          "default": 3
         }
       }
     }
