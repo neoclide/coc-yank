@@ -2,6 +2,9 @@
 
 Yank extension for [coc.nvim](https://github.com/neoclide/coc.nvim).
 
+Note, make sure you have TextYankPost autocmd with your vim by
+`:echo exists('##TextYankPost')`
+
 ## Install
 
 In your vim/neovim, run command:
