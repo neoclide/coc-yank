@@ -41,7 +41,12 @@
         "yank.list.maxsize": {
           "type": "number",
           "default": 300,
-          "description": "Duration of highlight"
+          "description": "Maximum size of preserved yank list."
+        },
+        "yank.byteLengthLimit": {
+          "type": "number",
+          "default": 10240,
+          "description": "Maximum byte length of yanked text which could be preserved."
         },
         "yank.enableCompletion": {
           "type": "boolean",

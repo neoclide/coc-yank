@@ -40,6 +40,12 @@ export default class DB {
     fs.unlinkSync(jsonFile)
   }
 
+  public clean(): void {
+    if (fs.existsSync(this.file)) {
+      fs.unlinkSync(this.file)
+    }
+  }
+
   public async load(): Promise<HistoryItem[]> {
     if (!fs.existsSync(this.file)) return []
     let items: HistoryItem[] = []

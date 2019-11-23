@@ -1,4 +1,4 @@
-import { ExtensionContext, languages, listManager, workspace } from 'coc.nvim'
+import { ExtensionContext, languages, commands, listManager, workspace } from 'coc.nvim'
 import { CompletionItem, CompletionItemKind, Position, Range } from 'vscode-languageserver-types'
 import DB from './db'
 import YankList from './list/yank'
@@ -12,11 +12,15 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
   const config = workspace.getConfiguration('yank')
   let db = new DB(storagePath, config.get<number>('list.maxsize', 200))
+  const maxLength = config.get<number>('byteLengthLimit', 10240)
   if (config.get<boolean>('highlight.enable', true)) {
     workspace.nvim.command('highlight default link HighlightedyankRegion IncSearch', true)
   }
   let winid: number
   subscriptions.push(listManager.registerList(new YankList(workspace.nvim, db)))
+  subscriptions.push(commands.registerCommand('yank.clean', () => {
+    db.clean()
+  }))
   subscriptions.push(workspace.registerAutocmd({
     event: 'TextYankPost',
     arglist: ['v:event', "+expand('<abuf>')"],
@@ -25,6 +29,11 @@ export async function activate(context: ExtensionContext): Promise<void> {
       let { regtype, operator, regcontents } = event
       let doc = workspace.getDocument(bufnr)
       if (!doc) return
+      let len = 0
+      for (let s of regcontents) {
+        len += Buffer.byteLength(s, 'utf8')
+      }
+      if (len > maxLength) return
       doc.forceSync()
       let [, lnum, col] = await nvim.call('getpos', ["'["])
       let character = byteSlice(doc.getline(lnum - 1), 0, col).length
