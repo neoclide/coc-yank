@@ -24,7 +24,7 @@ nnoremap <silent> <space>y  :<C-u>CocList -A --normal yank<cr>
 ## Features
 
 - Highlight yanked text.
-- Provide persist yank list cross vim instance.
+- Persist yank list across vim instances.
 
 ## Options
 
@@ -41,6 +41,10 @@ Q: How to change highlight color?
 
 A: Add `hi HighlightedyankRegion term=bold ctermbg=0 guibg=#13354A` to your
 `.vimrc` after `:colorscheme` command.
+
+Q: How to clear all yanks?
+
+A: In vim, `:CocCommand yank.clean`
 
 ## License
 
