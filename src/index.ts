@@ -37,10 +37,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
       doc.forceSync()
       let [, lnum, col] = await nvim.call('getpos', ["'["])
       let character = byteSlice(doc.getline(lnum - 1), 0, col).length
-      if (operator == 'y') {
-        // highlight
-        let enable = config.get<boolean>('highlight.enable', true)
-        if (!enable) return
+      let enableHighlight = config.get<boolean>('highlight.enable', true)
+      if (enableHighlight && operator == 'y') {
         winid = await nvim.call('win_getid')
         let ranges: Range[] = []
         let duration = config.get<number>('highlight.duration', 500)
