@@ -37,7 +37,7 @@ export default class DB {
     let items = rawItems;
 
     if (items.length > this.maxsize) {
-      items = items.slice(items.length - this.maxsize - 1);
+      items = items.slice(items.length - this.maxsize);
     }
 
     for (let item of items) {
