@@ -20,20 +20,44 @@ export default class DB {
     this.convertJson(jsonFile)
   }
 
+  private buildItem(content: string[], filepath: string, regtype: string, filetype: string): HistoryItem {
+    let id = crypto.createHash('md5').update(content.join('\n')).digest('hex')
+
+    return {
+      id,
+      content,
+      path: filepath,
+      filetype,
+      regtype,
+    }
+  }
+
+  private write(rawItems: Array<HistoryItem>): void {
+    let lines: string[] = []
+    let items = rawItems;
+
+    if (items.length > this.maxsize) {
+      items = items.slice(items.length - this.maxsize);
+    }
+
+    for (let item of items) {
+      let [filepath, lnum, col] = item.path.split('\t')
+      let line = `${item.id}|${filepath}|${lnum}|${col}|${item.regtype}|${item.filetype}`
+      lines.push(line)
+      lines.push(...item.content.map(s => `\t${s}`))
+    }
+
+    fs.writeFileSync(this.file, lines.join('\n') + '\n', 'utf8')
+  }
+
   private convertJson(jsonFile: string): void {
     if (!fs.existsSync(jsonFile)) return
     try {
       let content = fs.readFileSync(jsonFile, 'utf8')
-      let arr = JSON.parse(content) as HistoryItem[]
-      let lines: string[] = []
-      for (let item of arr) {
-        let hash = crypto.createHash('md5').update(item.content.join('\n')).digest('hex')
-        let [path, lnum, col] = item.path.split('\t')
-        let line = `${hash}|${path}|${lnum}|${col}|${item.regtype}|${item.filetype}`
-        lines.push(line)
-        lines.push(...item.content.map(s => `\t${s}`))
-      }
-      fs.writeFileSync(this.file, lines.join('\n') + '\n', 'utf8')
+      let items = JSON.parse(content).map(
+        ({ content, filepath, regtype, filetype }) => this.buildItem(content, filepath, regtype, filetype)
+      )
+      this.write(items)
     } catch (_e) {
       // noop
     }
@@ -79,16 +103,12 @@ export default class DB {
   }
 
   public async add(content: string[], regtype: string, filepath: string, filetype: string): Promise<void> {
-    let lines: string[] = []
-    let hash = crypto.createHash('md5').update(content.join('\n')).digest('hex')
+    let item = this.buildItem(content, filepath, regtype, filetype)
     let items = await this.load()
-    let idx = items.findIndex(o => o.id == hash)
+    let idx = items.findIndex(o => o.id == item.id)
     if (idx != -1) return
-    let [path, lnum, col] = filepath.split('\t')
-    let line = `${hash}|${path}|${lnum}|${col}|${regtype}|${filetype}`
-    lines.push(line)
-    lines.push(...content.map(s => `\t${s}`))
-    fs.appendFileSync(this.file, lines.join('\n') + '\n', 'utf8')
+    items.push(item)
+    this.write(items)
   }
 
   public async delete(id: string | string[]): Promise<void> {
@@ -97,13 +117,7 @@ export default class DB {
       if (typeof id == 'string') return o.id != id
       return id.indexOf(o.id) == -1
     })
-    let lines: string[] = []
-    for (let item of items) {
-      let [path, lnum, col] = item.path.split('\t')
-      let line = `${item.id}|${path}|${lnum}|${col}|${item.regtype}|${item.filetype}`
-      lines.push(line)
-      lines.push(...item.content.map(s => `\t${s}`))
-    }
-    fs.writeFileSync(this.file, lines.join('\n') + '\n', 'utf8')
+
+    this.write(items);
   }
 }
