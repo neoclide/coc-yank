@@ -74,7 +74,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         await nvim.resumeNotification()
         if (ids.length) {
           setTimeout(() => {
-            nvim.call('coc#util#clearmatches', [ids], true)
+            nvim.call('coc#util#clearmatches', [ids, winid], true)
           }, duration)
         }
       }
