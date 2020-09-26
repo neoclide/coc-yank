@@ -46,6 +46,10 @@ Q: How to clear all yanks?
 
 A: In vim, `:CocCommand yank.clean`
 
+Q: Highlighted yank not cleared after window leave.
+
+A: You can use `autocmd WinLeave * call coc#util#clear_pos_matches('^HighlightedyankRegion')`
+
 ## License
 
 MIT
