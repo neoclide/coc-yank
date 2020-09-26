@@ -22,6 +22,13 @@ export async function activate(context: ExtensionContext): Promise<void> {
     db.clean()
   }))
   subscriptions.push(workspace.registerAutocmd({
+    event: 'WinLeave',
+    request: true,
+    callback: async () => {
+      await workspace.nvim.call('coc#util#clear_pos_matches', ['^HighlightedyankRegion'])
+    }
+  }))
+  subscriptions.push(workspace.registerAutocmd({
     event: 'TextYankPost',
     arglist: ['v:event', "+expand('<abuf>')"],
     callback: async (event, bufnr) => {
