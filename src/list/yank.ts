@@ -96,7 +96,7 @@ export default class YankList extends BasicList {
 
     this.addAction('preview', async (item: ListItem, context) => {
       let { filetype, content } = item.data as HistoryItem
-      let mod = context.options.position == 'top' ? 'below' : ''
+      let mod = context.options.position == 'top' ? 'below' : 'above'
       let height = content.length
       let winid = context.listWindow.id
       nvim.pauseNotification()
