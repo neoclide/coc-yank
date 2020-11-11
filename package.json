@@ -14,7 +14,7 @@
     "url": "git+https://github.com/neoclide/coc-yank.git"
   },
   "engines": {
-    "coc": "^0.0.73"
+    "coc": "^0.0.79"
   },
   "scripts": {
     "clean": "rimraf lib",
@@ -73,7 +73,7 @@
     "@chemzqm/tslint-config": "^1.0.18",
     "@types/colors": "^1.2.1",
     "@types/node": "^12.0.10",
-    "coc.nvim": "^0.0.71",
+    "coc.nvim": "^0.0.79",
     "colors": "^1.3.3",
     "rimraf": "^2.6.3",
     "ts-loader": "^6.0.4",

@@ -14,6 +14,10 @@ export default class YankList extends BasicList {
     this.addAction('append', async (item: ListItem) => {
       let { document, position } = await workspace.getCurrentState()
       let doc = workspace.getDocument(document.uri)
+      if (!doc || !doc.attached) {
+        workspace.showMessage(`Current document not attached.`)
+        return
+      }
       let edits: TextEdit[] = []
       let { regtype, content } = item.data as HistoryItem
       let line = doc.getline(position.line)
@@ -41,12 +45,16 @@ export default class YankList extends BasicList {
           })
         }
       }
-      await doc.applyEdits(nvim, edits)
+      await doc.applyEdits(edits)
     })
 
     this.addAction('prepend', async (item: ListItem) => {
       let { document, position } = await workspace.getCurrentState()
       let doc = workspace.getDocument(document.uri)
+      if (!doc || !doc.attached) {
+        workspace.showMessage(`Current document not attached.`)
+        return
+      }
       let edits: TextEdit[] = []
       let { regtype, content } = item.data as HistoryItem
       if (regtype == 'v') {
@@ -73,7 +81,7 @@ export default class YankList extends BasicList {
           })
         }
       }
-      await doc.applyEdits(nvim, edits)
+      await doc.applyEdits(edits)
     })
 
     this.addAction('open', async (item: ListItem) => {
