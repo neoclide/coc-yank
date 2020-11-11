@@ -104,21 +104,11 @@ export default class YankList extends BasicList {
 
     this.addAction('preview', async (item: ListItem, context) => {
       let { filetype, content } = item.data as HistoryItem
-      let mod = context.options.position == 'top' ? 'below' : 'above'
-      let height = content.length
-      let winid = context.listWindow.id
-      nvim.pauseNotification()
-      nvim.command('pclose', true)
-      nvim.command(`${mod} ${height}new +setl\\ previewwindow`, true)
-      nvim.command('setl buftype=nofile', true)
-      nvim.command('setl bufhidden=wipe', true)
-      nvim.command(`setl filetype=${filetype}`, true)
-      nvim.call('setline', [1, content[0]], true)
-      nvim.call('append', [1, content.slice(1)], true)
-      nvim.command('normal! ggzt', true)
-      nvim.call('win_gotoid', [winid], true)
-      nvim.command('redraw', true)
-      await nvim.resumeNotification()
+      this.preview({
+        sketch: true,
+        filetype,
+        lines: content
+      }, context)
     })
   }
 
