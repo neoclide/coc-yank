@@ -23,13 +23,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }))
   subscriptions.push(workspace.registerAutocmd({
     event: 'WinLeave',
-    request: true,
-    callback: async () => {
-      try {
-        await workspace.nvim.call('coc#util#clear_pos_matches', ['^HighlightedyankRegion'])
-      } catch (e) {
-        //noop
-      }
+    request: false,
+    arglist: ['win_getid()'],
+    callback: async (winid) => {
+      workspace.nvim.call('coc#highlight#clear_win_matches', [winid, '^HighlightedyankRegion'], true)
     }
   }))
   subscriptions.push(workspace.registerAutocmd({
