@@ -5,7 +5,7 @@ import YankList from './list/yank'
 import { mkdirAsync, statAsync } from './util'
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  let { subscriptions, storagePath } = context
+  let { subscriptions, logger, storagePath } = context
   let stat = await statAsync(storagePath)
   if (!stat || !stat.isDirectory()) {
     await mkdirAsync(storagePath)
@@ -16,7 +16,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
   if (config.get<boolean>('highlight.enable', true)) {
     workspace.nvim.command('highlight default link HighlightedyankRegion IncSearch', true)
   }
-  let winid: number
   subscriptions.push(listManager.registerList(new YankList(workspace.nvim, db)))
   subscriptions.push(commands.registerCommand('yank.clean', () => {
     db.clean()
@@ -31,23 +30,21 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }))
   subscriptions.push(workspace.registerAutocmd({
     event: 'TextYankPost',
-    arglist: ['v:event', "+expand('<abuf>')"],
-    callback: async (event, bufnr) => {
+    arglist: ['v:event', "+expand('<abuf>')", 'win_getid()'],
+    callback: async (event, bufnr, winid) => {
       let { nvim } = workspace
       let { regtype, operator, regcontents } = event
       let doc = workspace.getDocument(bufnr)
-      if (!doc) return
+      if (!doc || !doc.attached) return
       let len = 0
       for (let s of regcontents) {
         len += Buffer.byteLength(s, 'utf8')
       }
       if (len > maxLength) return
-      doc.forceSync()
       let [, lnum, col] = await nvim.call('getpos', ["'["])
       let character = byteSlice(doc.getline(lnum - 1), 0, col).length
       let enableHighlight = config.get<boolean>('highlight.enable', true)
       if (enableHighlight && operator == 'y') {
-        winid = await nvim.call('win_getid')
         let ranges: Range[] = []
         let duration = config.get<number>('highlight.duration', 500)
         // block selection
@@ -75,16 +72,13 @@ export async function activate(context: ExtensionContext): Promise<void> {
             ranges.push(Range.create(i - 1, 0, i - 1, line.length))
           }
         } else {
+          logger.error(`Unkonw regtype "${regtype}"`)
           return
         }
-        nvim.pauseNotification()
-        let ids = doc.matchAddRanges(ranges, 'HighlightedyankRegion', 99)
-        await nvim.resumeNotification()
-        if (ids.length) {
-          setTimeout(() => {
-            nvim.call('coc#util#clearmatches', [ids, winid], true)
-          }, duration)
-        }
+        nvim.call('coc#highlight#match_ranges', [winid, bufnr, ranges, 'HighlightedyankRegion', 99], true)
+        setTimeout(() => {
+          nvim.call('coc#highlight#clear_match_group', [winid, '^HighlightedyankRegion'], true)
+        }, duration)
       }
       let content = regcontents.join('\n')
       if (content.length < 4) return
