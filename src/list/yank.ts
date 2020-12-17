@@ -1,7 +1,7 @@
-import { Neovim, BasicList, ListContext, workspace, ListItem } from 'coc.nvim'
+import { BasicList, ListContext, ListItem, Neovim, window, workspace } from 'coc.nvim'
+import colors from 'colors/safe'
 import { Position, Range, TextEdit } from 'vscode-languageserver-protocol'
 import DB, { HistoryItem } from '../db'
-import colors from 'colors/safe'
 
 export default class YankList extends BasicList {
   public readonly name = 'yank'
@@ -15,7 +15,7 @@ export default class YankList extends BasicList {
       let { document, position } = await workspace.getCurrentState()
       let doc = workspace.getDocument(document.uri)
       if (!doc || !doc.attached) {
-        workspace.showMessage(`Current document not attached.`)
+        window.showMessage(`Current document not attached.`)
         return
       }
       let edits: TextEdit[] = []
@@ -52,7 +52,7 @@ export default class YankList extends BasicList {
       let { document, position } = await workspace.getCurrentState()
       let doc = workspace.getDocument(document.uri)
       if (!doc || !doc.attached) {
-        workspace.showMessage(`Current document not attached.`)
+        window.showMessage(`Current document not attached.`)
         return
       }
       let edits: TextEdit[] = []

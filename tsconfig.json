@@ -3,16 +3,12 @@
   "compilerOptions": {
     "declaration": false,
     "outDir": "lib",
-    "target": "es2015",
+    "target": "es2017",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": [
-      "es2018"
-    ],
+    "lib": ["es2018"],
     "plugins": []
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "exclude": []
 }
