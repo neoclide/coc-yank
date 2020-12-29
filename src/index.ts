@@ -1,4 +1,4 @@
-import { ExtensionContext, languages, commands, listManager, workspace } from 'coc.nvim'
+import { ExtensionContext, events, languages, commands, listManager, workspace } from 'coc.nvim'
 import { CompletionItem, CompletionItemKind, Position, Range } from 'vscode-languageserver-types'
 import DB from './db'
 import YankList from './list/yank'
@@ -20,14 +20,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
   subscriptions.push(commands.registerCommand('yank.clean', () => {
     db.clean()
   }))
-  subscriptions.push(workspace.registerAutocmd({
-    event: 'WinLeave',
-    request: false,
-    arglist: ['win_getid()'],
-    callback: async (winid) => {
-      workspace.nvim.call('coc#highlight#clear_win_matches', [winid, '^HighlightedyankRegion'], true)
-    }
-  }))
+  events.on('WinLeave', winid => {
+    workspace.nvim.call('coc#highlight#clear_win_matches', [winid, '^HighlightedyankRegion'], true)
+  }, null, subscriptions)
   subscriptions.push(workspace.registerAutocmd({
     event: 'TextYankPost',
     arglist: ['v:event', "+expand('<abuf>')", 'win_getid()'],

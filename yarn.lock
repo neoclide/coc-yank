@@ -574,10 +574,10 @@ cliui@^5.0.0:
     strip-ansi "^5.2.0"
     wrap-ansi "^5.1.0"
 
-coc.nvim@^0.0.79-next.18:
-  version "0.0.79-next.18"
-  resolved "https://registry.yarnpkg.com/coc.nvim/-/coc.nvim-0.0.79-next.18.tgz#48ad533290270f595f2a68bd414dcfce325faf78"
-  integrity sha512-tTSY2ZPhQyhdQ0uYnZc+nr8SMRODF/PKYe6YzL5DFS3cQ5wq9OoalODygP1DFLRWgIB3Jc+G2PVviqqaafnT+Q==
+coc.nvim@^0.0.80:
+  version "0.0.80"
+  resolved "https://registry.yarnpkg.com/coc.nvim/-/coc.nvim-0.0.80.tgz#785145c382660db03f517f9b497900d95cbd0e4f"
+  integrity sha512-/3vTcnofoAYMrdENrlQmADTzfXX4+PZ0fiM10a39UA37dTR2dpIGi9O469kcIksuunLjToqWG8S45AGx/9wV7g==
 
 code-point-at@^1.0.0:
   version "1.1.0"
