@@ -39,7 +39,7 @@ nnoremap <silent> <space>y  :<C-u>CocList -A --normal yank<cr>
 
 Q: How to change highlight color?
 
-A: Add `hi HighlightedyankRegion term=bold ctermbg=0 guibg=#13354A` to your
+A: Add `hi HighlightedyankRegion cterm=bold gui=bold ctermbg=0 guibg=#13354A` to your
 `.vimrc` after `:colorscheme` command.
 
 Q: How to clear all yanks?
