@@ -83,7 +83,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }
   }))
 
-  languages.registerCompletionItemProvider('yank', 'YANK', null, {
+  languages.registerCompletionItemProvider('yank', config.get('shortcut', 'YANK'), null, {
     provideCompletionItems: async (document, _position, _token, context): Promise<CompletionItem[]> => {
       const config = workspace.getConfiguration('yank')
       let enabled = config.get<boolean>('enableCompletion', true)

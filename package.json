@@ -62,6 +62,11 @@
           "type": "integer",
           "description": "Max completion item count from yank history.",
           "default": 3
+        },
+        "yank.shortcut": {
+          "type": "string",
+          "default": "YANK",
+          "description": "shortcut for yank source."
         }
       }
     }

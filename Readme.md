@@ -34,6 +34,7 @@ nnoremap <silent> <space>y  :<C-u>CocList -A --normal yank<cr>
 - `yank.enableCompletion`: Enable completion support for yanked text, default: `true`
 - `yank.priority`: Priority of yank completion source, default: 90.
 - `yank.limit`: Max completion item count from yank history.
+- `yank.shortcut`: Shortcut for yank source, default: "YANK".
 
 ## F.A.Q
 
