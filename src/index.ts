@@ -21,7 +21,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     db.clean()
   }))
   events.on('WinLeave', winid => {
-    workspace.nvim.call('coc#highlight#clear_win_matches', [winid, '^HighlightedyankRegion'], true)
+    workspace.nvim.call('coc#highlight#clear_match_group', [winid, '^HighlightedyankRegion'], true)
   }, null, subscriptions)
   subscriptions.push(workspace.registerAutocmd({
     event: 'TextYankPost',
