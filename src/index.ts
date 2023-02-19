@@ -28,7 +28,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     arglist: ['v:event', "+expand('<abuf>')", 'win_getid()'],
     callback: async (event, bufnr, winid) => {
       let { nvim } = workspace
-      let { regtype, operator, regcontents } = event
+      let { regtype, operator, regcontents, regname, inclusive } = event;
       let doc = workspace.getDocument(bufnr)
       if (!doc || !doc.attached) return
       let len = 0
@@ -36,7 +36,19 @@ export async function activate(context: ExtensionContext): Promise<void> {
         len += Buffer.byteLength(s, 'utf8')
       }
       if (len > maxLength) return
-      let [, lnum, col] = await nvim.call('getpos', ["'["])
+      let lnum, col
+      if ((!await nvim.call('has', 'nvim')) && regname == '*' && !inclusive) {
+          let [, lnum_1, col_1] = await nvim.call('getpos', ["'<"]);
+          let [, lnum_2, col_2] = await nvim.call('getpos', ["'>"]);
+          lnum = lnum_1;
+          if (col_1 <= col_2) {
+              col = col_1;
+          } else {
+              col = col_2;
+          }
+      } else {
+        [, lnum, col] = await nvim.call('getpos', ["."]);
+      }
       let character = byteSlice(doc.getline(lnum - 1), 0, col).length
       let enableHighlight = config.get<boolean>('highlight.enable', true)
       if (enableHighlight && operator == 'y') {
@@ -47,7 +59,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
           let view = await nvim.call('winsaveview')
           await nvim.call('setpos', ['.', [0, lnum, col, 0]])
           for (let i = lnum; i < lnum + regcontents.length; i++) {
-            let col = await nvim.call('col', ['.'])
             let line = doc.getline(i - 1)
             let startCharacter = byteSlice(line, 0, col - 1).length
             let start = Position.create(i - 1, startCharacter)
