@@ -38,14 +38,14 @@ export async function activate(context: ExtensionContext): Promise<void> {
       if (len > maxLength) return
       let lnum, col
       if ((!await nvim.call('has', 'nvim')) && regname == '*' && !inclusive) {
-          let [, lnum_1, col_1] = await nvim.call('getpos', ["'<"])
-          let [, lnum_2, col_2] = await nvim.call('getpos', ["'>"])
-          lnum = lnum_1;
-          if (col_1 <= col_2) {
-              col = col_1
-          } else {
-              col = col_2
-          }
+        let [, lnum_1, col_1] = await nvim.call('getpos', ["'<"])
+        let [, lnum_2, col_2] = await nvim.call('getpos', ["'>"])
+        lnum = lnum_1;
+        if (col_1 <= col_2) {
+          col = col_1
+        } else {
+          col = col_2
+        }
       } else {
         [, lnum, col] = await nvim.call('getpos', ["."])
       }
@@ -83,12 +83,12 @@ export async function activate(context: ExtensionContext): Promise<void> {
         }
         nvim.call('coc#highlight#match_ranges', [winid, bufnr, ranges, 'HighlightedyankRegion', 99], true)
         setTimeout(() => {
-            nvim.call('coc#highlight#clear_match_group', [winid, '^HighlightedyankRegion'], true)
-            if (nvim.call('has', 'nvim')) {
-              // - Hack for bug where highlight only works 1 time after starting Vim.
-              // - Can give some flickering, and clears cmd texts.
-              nvim.command('redraw!')
-            }
+          nvim.call('coc#highlight#clear_match_group', [winid, '^HighlightedyankRegion'], true)
+          if (nvim.call('has', 'nvim')) {
+            // - Hack for bug where highlight only works 1 time after starting Vim.
+            // - Can give some flickering, and clears cmd texts.
+            nvim.command('redraw!')
+          }
         }, duration)
       }
       let content = regcontents.join('\n')
