@@ -1,5 +1,4 @@
-import { ExtensionContext, events, languages, commands, listManager, workspace } from 'coc.nvim'
-import { CompletionItem, CompletionItemKind, Position, Range } from 'vscode-languageserver-types'
+import { CompletionItem, CompletionItemKind, ExtensionContext, Position, Range, commands, events, languages, listManager, workspace } from 'coc.nvim'
 import DB from './db'
 import YankList from './list/yank'
 import { mkdirAsync, statAsync } from './util'
