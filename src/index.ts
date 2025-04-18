@@ -83,10 +83,12 @@ export async function activate(context: ExtensionContext): Promise<void> {
         nvim.call('coc#highlight#match_ranges', [winid, bufnr, ranges, 'HighlightedyankRegion', 99], true)
         setTimeout(() => {
           nvim.call('coc#highlight#clear_match_group', [winid, '^HighlightedyankRegion'], true)
-          if (nvim.call('has', 'nvim')) {
+          if (workspace.isNvim) {
             // - Hack for bug where highlight only works 1 time after starting Vim.
             // - Can give some flickering, and clears cmd texts.
             nvim.command('redraw!')
+          } else {
+            nvim.command('redraw', true)
           }
         }, duration)
       }
